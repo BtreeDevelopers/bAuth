@@ -1,0 +1,67 @@
+Based on https://youtu.be/MLPTh3XVc2o thx <3
+
+npm init -y
+npm i -D typescript tsc-watch eslint prettier eslint-config-prettier eslint-plugin-prettier @typescript-eslint/parser @typescript-eslint/eslint-plugin @types/node @types/express
+npm i express dotenv
+
+npx tsc --init
+
+* Change the tsconfig.json:
+"baseUrl": "./src",
+"outDir": "dist", 
+"paths": {
+      "@/resources/*": ["resources/*"],
+      "@/utils/*": ["utils/*"],
+      "@/middleware/*": ["middleware/*"],
+},
+
+* Scripts:
+    "start": "node dist/index.js",
+    "dev": "tsc-watch --onSuccess \"node ./dist/index.js\"",
+    "build": "tsc",
+    "postinstall": "npm run build"
+
+Create file .eslintrc.js
+Create file .prettierrc.js
+Create file .gitignore
+
+npm i module-alias
+npm i --save-dev @types/module-alias
+
+* In the package.json, config the module-alias:
+"_moduleAliases": {
+    "@/resources": "dist/resources",
+    "@/utils": "dist/utils",
+    "@/middleware": "dist/middleware"
+}
+
+Create the folder src and the inner folders middleware, utils,resources
+Create the files app.ts and index.ts and app.js
+
+
+npm i cors morgan helmet
+npm i --save-dev @types/cors
+npm i --save-dev @types/morgan
+
+morgan => log of HTTP requisitions
+helmet => set HTTP headers
+
+npm i express zod --save
+npm i @types/express --save-dev
+
+npm i mongoose
+
+npm i jsonwebtoken
+npm i --save-dev @types/jsonwebtoken
+
+create the function genetareToken, it can be found in utils/Auth/jwt.auth.ts
+create the middleware JWT, can be found in middleware/auth.middleware.ts
+Is needed to modify the Request interface of Express, can see it on @types/express/index.d.ts
+
+npm install jest --save-dev
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",}
+
+
+npm install supertest --save-dev

@@ -27,9 +27,7 @@ const auth = async (
                     if (err) {
                         return res.status(401).json({ erro: 'Token unvalid' });
                     }
-
                     req.userId = decoded.id;
-
                     return next();
                 }
             );
