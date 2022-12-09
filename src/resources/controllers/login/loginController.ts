@@ -30,7 +30,7 @@ class LoginController implements Controller {
             if (!user) {
                 res.status(401).json({ message: 'Usuário não cadastrado' });
             } else {
-                const token = generateToken({ id: user.id });
+                const token = generateToken({ id: user._id });
                 res.status(200).json({ token, user });
             }
         } catch (error) {

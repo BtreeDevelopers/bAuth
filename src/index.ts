@@ -4,14 +4,17 @@ import App from './app';
 import LoginController from './resources/controllers/login/loginController';
 import UserController from './resources/controllers/user/userController';
 
-const userController = new UserController()
-const loginController = new LoginController()
+const loginController = new LoginController();
+const userController = new UserController();
 
 userController.initialiseRoutes();
 loginController.initialiseRoutes();
 
-const app = new App([userController,loginController], Number(process.env.PORT));
+const app = new App(
+    [userController, loginController],
+    Number(process.env.PORT)
+);
 
-app.start()
+app.start();
 
-app.listen()
+app.listen();

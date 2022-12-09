@@ -1,0 +1,182 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "B-Auth",
+        "description": "Btree Authenticator Unknown Treasure Hope",
+        "version": "1.0"
+    },
+    "host": "https://bauth-production.up.railway.app/",
+    "basePath": "/",
+    "schemes": ["http"],
+    "paths": {
+        "/auth/login": {
+            "post": {
+                "description": "Realizar Login.",
+                "operationId": "LOGIN",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Email and Password is needed to login",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/LoginBody"
+                        }
+                    }
+                ],
+
+                "responses": {
+                    "200": {
+                        "description": " The token and user from the successfull access"
+                    },
+                    "400": {
+                        "description": "Try catch error"
+                    },
+                    "401": {
+                        "description": "Usuário não cadastrado"
+                    }
+                }
+            }
+        },
+        "/auth/user": {
+            "get": {
+                "description": "Get user from sended token",
+                "operationId": "USERFROMTOKEN",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "bearer token",
+                        "description": "Valid Token from logged User",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Usertoken"
+                        }
+                    }
+                ],
+
+                "responses": {
+                    "201": {
+                        "description": " The token and user from the successfull access"
+                    },
+                    "400": {
+                        "description": "Usuário já criado"
+                    },
+                    "401": {
+                        "description": "Try catch error"
+                    }
+                }
+            }
+        },
+        "/auth/user": {
+            "post": {
+                "description": "Create new User",
+                "operationId": "CREATENEWUSER",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "NewUserBody",
+                        "description": "It must carry the name, email and password of the new User",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Newuser"
+                        }
+                    }
+                ],
+
+                "responses": {
+                    "201": {
+                        "description": " The token and user from the successfull access"
+                    },
+                    "400": {
+                        "description": "Usuário já criado"
+                    },
+                    "401": {
+                        "description": "Try catch error"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "LoginBody": {
+            "type": "object",
+            "required": ["email", "senha"],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "myemailisgreat@email.com"
+                },
+                "senha": {
+                    "type": "string",
+                    "example": "DoNotShare"
+                }
+            }
+        },
+        "Usertoken": {
+            "type": "object",
+            "required": ["bearer"],
+            "properties": {
+                "bearer": {
+                    "type": "string",
+                    "example": "oadb98qg9vbqiudbu82gd2b9"
+                }
+            }
+        },
+        "Newuser": {
+            "type": "object",
+            "required": ["name", "email", "senha"],
+            "properties": {
+                "name": {}
+            }
+        },
+        "Pet": {
+            "type": "object",
+            "required": ["name", "photoUrls"],
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "category": {
+                    "$ref": "#/definitions/Category"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "doggie"
+                },
+                "photoUrls": {
+                    "type": "array",
+                    "xml": {
+                        "wrapped": true
+                    },
+                    "items": {
+                        "type": "string",
+                        "xml": {
+                            "name": "photoUrl"
+                        }
+                    }
+                },
+                "tags": {
+                    "type": "array",
+                    "xml": {
+                        "wrapped": true
+                    },
+                    "items": {
+                        "xml": {
+                            "name": "tag"
+                        },
+                        "$ref": "#/definitions/Tag"
+                    }
+                },
+                "status": {
+                    "type": "string",
+                    "description": "pet status in the store",
+                    "enum": ["available", "pending", "sold"]
+                }
+            },
+            "xml": {
+                "name": "Pet"
+            }
+        }
+    }
+}

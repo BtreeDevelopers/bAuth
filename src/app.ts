@@ -4,6 +4,9 @@ import cors from 'cors';
 import morgan from 'morgan';
 import helmet from 'helmet';
 import mongoose from 'mongoose';
+import swaggerUi from 'swagger-ui-express';
+
+import swaggerDocument from '@/utils/swagger/swagger.json';
 
 class App {
     public express: Application;
@@ -37,6 +40,11 @@ class App {
         this.express.use(morgan('dev'));
         this.express.use(express.json());
         this.express.use(express.urlencoded({ extended: false }));
+        this.express.use(
+            '/api-docs',
+            swaggerUi.serve,
+            swaggerUi.setup(swaggerDocument)
+        );
     }
 
     private initialiseDatabaseConnection(): void {
