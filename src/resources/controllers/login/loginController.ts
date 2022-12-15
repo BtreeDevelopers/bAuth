@@ -16,7 +16,7 @@ class LoginController implements Controller {
         this.router.post(`${this.path}`, this.login);
     }
 
-    private async login(req: Request, res: Response): Promise<void> {
+    private async login(req: Request, res: Response): Promise<any> {
         try {
             const loginUser = z.object({
                 email: string().email(),
@@ -28,14 +28,15 @@ class LoginController implements Controller {
             const user = await userModel.findOne({ email, senha });
 
             if (!user) {
-                res.status(401).json({ message: 'Usuário não cadastrado' });
+                return res
+                    .status(401)
+                    .json({ message: 'Usuário não cadastrado' });
             } else {
                 const token = generateToken({ id: user._id });
-                res.status(200).json({ token, user });
+                return res.status(200).json({ token, user });
             }
         } catch (error) {
-            res.status(400).json({ error });
-            throw error;
+            return res.status(400).json({ error });
         }
     }
 }
