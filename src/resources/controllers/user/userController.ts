@@ -24,6 +24,7 @@ class UserController implements Controller {
             [auth, secret],
             this.getUserByParam
         );
+        this.router.post(`${this.path}/list`, secret, this.getFromList);
     }
 
     private async createNewUser(req: Request, res: Response): Promise<void> {
@@ -67,7 +68,7 @@ class UserController implements Controller {
 
     private async getAllUser(req: Request, res: Response): Promise<any> {
         try {
-            const user = await userModel.find();
+            const user = await userModel.find({});
             return res.status(201).json({ user });
         } catch (error) {
             return res.status(500).json({ message: 'Something went wrong' });
@@ -103,6 +104,23 @@ class UserController implements Controller {
                 });
                 return res.status(201).json({ user });
             }
+        } catch (error) {
+            return res.status(500).json({ message: 'Something went wrong' });
+        }
+    }
+
+    private async getFromList(req: Request, res: Response): Promise<any> {
+        try {
+            const listBody = z.object({
+                listArray: z.array(z.string()),
+            });
+
+            const listArray = listBody.parse(req.body);
+            const user = await userModel.find({
+                _id: { $in: listArray.listArray },
+            });
+
+            return res.status(201).json({ user });
         } catch (error) {
             return res.status(500).json({ message: 'Something went wrong' });
         }
