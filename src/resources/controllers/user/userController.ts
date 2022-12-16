@@ -119,7 +119,7 @@ class UserController implements Controller {
             const user = await userModel.find({
                 _id: { $in: listArray.listArray },
             });
-
+            console.log(user);
             return res.status(201).json({ user });
         } catch (error) {
             return res.status(500).json({ message: 'Something went wrong' });
