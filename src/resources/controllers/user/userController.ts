@@ -58,8 +58,13 @@ class UserController implements Controller {
                     email,
                     senha: hash,
                 });
+
                 const token = generateToken({ id: data.id });
-                res.status(201).json({ token, data });
+
+                res.status(201).json({
+                    token,
+                    data: { nome: data.nome, email: data.email, _id: data._id },
+                });
             } else {
                 res.status(400).json({ message: 'usuário já criado' });
             }
