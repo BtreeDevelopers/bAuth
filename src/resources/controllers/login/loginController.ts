@@ -26,9 +26,10 @@ class LoginController implements Controller {
             });
 
             const { email, senha } = loginUser.parse(req.body);
-            const hash = await bcryptjs.hash(senha, 10);
 
-            const user = await userModel.findOne({ email, senha: hash });
+            const user = await userModel
+                .findOne({ email: email })
+                .populate('senha');
 
             if (!user) {
                 return res
@@ -48,6 +49,7 @@ class LoginController implements Controller {
                     .status(401)
                     .json({ message: 'Usuário ou senha incorretos' });
             }
+            console.log(error);
             return res.status(400).json({ error });
         }
     }
