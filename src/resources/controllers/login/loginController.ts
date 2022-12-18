@@ -4,6 +4,7 @@ import generateToken from '@/utils/Auth/jwt.auth';
 import { Router, Request, Response } from 'express';
 import z, { string } from 'zod';
 import { compare } from 'bcryptjs';
+import bcryptjs from 'bcryptjs';
 
 class LoginController implements Controller {
     public path = '/login';
@@ -25,8 +26,9 @@ class LoginController implements Controller {
             });
 
             const { email, senha } = loginUser.parse(req.body);
+            const hash = await bcryptjs.hash(senha, 10);
 
-            const user = await userModel.findOne({ email, senha });
+            const user = await userModel.findOne({ email, senha: hash });
 
             if (!user) {
                 return res
@@ -36,6 +38,7 @@ class LoginController implements Controller {
                 const passwordMatch = await compare(senha, user.senha);
                 if (!passwordMatch)
                     throw new Error('Usuário ou senha incorretos');
+
                 const token = generateToken({ id: user._id });
                 return res.status(200).json({ token, user });
             }
