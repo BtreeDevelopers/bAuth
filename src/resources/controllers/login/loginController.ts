@@ -3,6 +3,7 @@ import userModel from '@/resources/models/userModel';
 import generateToken from '@/utils/Auth/jwt.auth';
 import { Router, Request, Response } from 'express';
 import z, { string } from 'zod';
+import { compare } from 'bcryptjs';
 
 class LoginController implements Controller {
     public path = '/login';
@@ -32,10 +33,18 @@ class LoginController implements Controller {
                     .status(401)
                     .json({ message: 'Usuário não cadastrado' });
             } else {
+                const passwordMatch = await compare(senha, user.senha);
+                if (!passwordMatch)
+                    throw new Error('Usuário ou senha incorretos');
                 const token = generateToken({ id: user._id });
                 return res.status(200).json({ token, user });
             }
-        } catch (error) {
+        } catch (error: any) {
+            if (error.message === 'Usuário ou senha incorretos') {
+                return res
+                    .status(401)
+                    .json({ message: 'Usuário ou senha incorretos' });
+            }
             return res.status(400).json({ error });
         }
     }

@@ -6,6 +6,7 @@ const UserSchema = new Schema(
         nome: { type: String, require: true },
         email: { type: String, require: true },
         senha: { type: String, require: true, select: false },
+        imagemUrl: { type: String, require: true },
     },
     {
         timestamps: true,

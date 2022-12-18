@@ -6,6 +6,11 @@ import auth from '@/middleware/authMiddleware';
 
 import z, { string } from 'zod';
 import secret from '@/middleware/secretMiddleware';
+import Multer from '@/middleware/multerMiddleware';
+import uploadImage from '@/utils/firebase/firebase';
+import mongoose from 'mongoose';
+
+import bcryptjs from 'bcryptjs';
 
 class UserController implements Controller {
     public path = '/user';
@@ -25,6 +30,13 @@ class UserController implements Controller {
             this.getUserByParam
         );
         this.router.post(`${this.path}/list`, secret, this.getFromList);
+        this.router.post(
+            `${this.path}/image`,
+            auth,
+            Multer.single('imagem'),
+            uploadImage,
+            this.uploadImage
+        );
     }
 
     private async createNewUser(req: Request, res: Response): Promise<void> {
@@ -40,7 +52,12 @@ class UserController implements Controller {
             const user = await userModel.findOne({ nome, email });
 
             if (!user) {
-                const data = await userModel.create({ nome, email, senha });
+                const hash = await bcryptjs.hash(senha, 10);
+                const data = await userModel.create({
+                    nome,
+                    email,
+                    senha: hash,
+                });
                 const token = generateToken({ id: data.id });
                 res.status(201).json({ token, data });
             } else {
@@ -123,6 +140,27 @@ class UserController implements Controller {
             return res.status(201).json({ user });
         } catch (error) {
             return res.status(500).json({ message: 'Something went wrong' });
+        }
+    }
+
+    private async uploadImage(req: Request, res: Response): Promise<any> {
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        try {
+            const firebaseUrl = (req.file as any)?.firebaseUrl || '';
+
+            await userModel.updateOne(
+                { _id: req.userId },
+                { imagemUrl: firebaseUrl }
+            );
+            await session.commitTransaction();
+            return res.status(200).json({ message: 'User Image Updated' });
+        } catch (error) {
+            console.log(error);
+            await session.abortTransaction();
+            return res.status(401).json({ message: 'Something went wrong' });
+        } finally {
+            await session.endSession();
         }
     }
 }

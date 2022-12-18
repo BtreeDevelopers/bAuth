@@ -1,9 +1,10 @@
-import { Document} from 'mongoose';
+import { Document } from 'mongoose';
 
-interface User extends Document{
+interface User extends Document {
     nome: string;
     email: string;
-    senha: string;    
+    senha: string;
+    imagemUrl: string;
 }
 
 export default User;
