@@ -59,15 +59,7 @@ class UserController implements Controller {
                     senha: hash,
                 });
 
-                console.log({
-                    hash: hash,
-                    senha: senha,
-                });
-
-                const token = generateToken({ id: data.id });
-
                 res.status(201).json({
-                    token,
                     data: { nome: data.nome, email: data.email, _id: data._id },
                 });
             } else {
