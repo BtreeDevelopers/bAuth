@@ -41,7 +41,15 @@ class LoginController implements Controller {
                     throw new Error('Usuário ou senha incorretos');
 
                 const token = generateToken({ id: user._id });
-                return res.status(200).json({ token, user });
+                return res.status(200).json({
+                    token,
+                    user: {
+                        _id: user._id,
+                        nome: user.nome,
+                        email: user.email,
+                        imagemUrl: user.imagemUrl,
+                    },
+                });
             }
         } catch (error: any) {
             if (error.message === 'Usuário ou senha incorretos') {
