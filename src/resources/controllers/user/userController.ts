@@ -133,7 +133,7 @@ class UserController implements Controller {
             const listBody = z.object({
                 listArray: z.array(z.string()),
             });
-
+            console.log(req.body);
             const listArray = listBody.parse(req.body);
             const user = await userModel.find({
                 _id: { $in: listArray.listArray },
@@ -141,6 +141,7 @@ class UserController implements Controller {
             console.log(user);
             return res.status(201).json({ user });
         } catch (error) {
+            //console.log(error);
             return res.status(500).json({ message: 'Something went wrong' });
         }
     }
@@ -156,7 +157,12 @@ class UserController implements Controller {
                 { imagemUrl: firebaseUrl }
             );
             await session.commitTransaction();
-            return res.status(200).json({ message: 'User Image Updated' });
+            return res
+                .status(200)
+                .json({
+                    message: 'User Image Updated',
+                    imagemUrl: firebaseUrl,
+                });
         } catch (error) {
             console.log(error);
             await session.abortTransaction();
