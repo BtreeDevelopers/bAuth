@@ -12,7 +12,7 @@ loginController.initialiseRoutes();
 
 const app = new App(
     [userController, loginController],
-    Number(process.env.PORT)
+    process.env.PORT as any
 );
 
 app.start();
