@@ -5,6 +5,9 @@ interface User extends Document {
     email: string;
     senha: string;
     imagemUrl: string;
+    idioma: string;
+    tema: string;
+    aplicativos: Array<string>;
 }
 
 export default User;
