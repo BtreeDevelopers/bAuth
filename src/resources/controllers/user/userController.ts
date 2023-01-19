@@ -15,6 +15,7 @@ import csrf from '@/middleware/csfrMiddleware';
 import accessModel from '@/resources/models/accessModel';
 import { descriptografar } from '@/utils/encript/encript';
 import axios from 'axios';
+import { compare } from 'bcryptjs';
 
 class UserController implements Controller {
     public path = '/user';
@@ -41,9 +42,9 @@ class UserController implements Controller {
             uploadImage,
             this.uploadImage
         );
-        this.router.post(`${this.path}/editaccount`, auth, this.editarConta);
+        this.router.put(`${this.path}/editaccount`, auth, this.editarConta);
 
-        this.router.delete(`${this.path}/delete`, auth, this.deleteaccount);
+        this.router.post(`${this.path}/delete`, auth, this.deleteaccount);
 
         // this.router.
         /*        
@@ -246,6 +247,13 @@ class UserController implements Controller {
                 senha: z.string(),
             });
             const { userId, senha } = deleteUserBody.parse(req.body);
+
+            const user = await userModel.findById(userId).populate('senha');
+            if (!user) throw new Error('Usuário ou senha incorretos');
+
+            const passwordMatch = await compare(senha, user.senha);
+            if (!passwordMatch) throw new Error('Usuário ou senha incorretos');
+
             const conBJRD = axios.create({
                 baseURL: String(process.env.BJORD_URL),
                 headers: {
