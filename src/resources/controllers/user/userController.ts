@@ -41,10 +41,11 @@ class UserController implements Controller {
             uploadImage,
             this.uploadImage
         );
-        this.router.put(`${this.path}/editaccount`, auth, this.editarConta);
+        this.router.post(`${this.path}/editaccount`, auth, this.editarConta);
 
         this.router.delete(`${this.path}`, auth, this.deleteaccount);
 
+        // this.router.
         /*        
          Editar apps - onde será enviado um novo arrays com os apps 
         ativos (podendo ser enviado um array vazio, para nenhum)
@@ -229,6 +230,7 @@ class UserController implements Controller {
             await session.commitTransaction();
             return res.status(201).json({ message: 'Update with success' });
         } catch (error: any) {
+            console.log(error);
             await session.abortTransaction();
             return res.status(500).json({ message: 'Something went wrong' });
         } finally {
