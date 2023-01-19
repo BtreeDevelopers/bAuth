@@ -43,7 +43,7 @@ class UserController implements Controller {
         );
         this.router.post(`${this.path}/editaccount`, auth, this.editarConta);
 
-        this.router.delete(`${this.path}`, auth, this.deleteaccount);
+        this.router.delete(`${this.path}/delete`, auth, this.deleteaccount);
 
         // this.router.
         /*        
