@@ -46,7 +46,7 @@ class UserController implements Controller {
 
         this.router.post(`${this.path}/delete`, auth, this.deleteaccount);
 
-        // this.router.
+        this.router.post(`${this.path}/apps`, auth, this.editarapps);
         /*        
          Editar apps - onde será enviado um novo arrays com os apps 
         ativos (podendo ser enviado um array vazio, para nenhum)
@@ -252,7 +252,7 @@ class UserController implements Controller {
             if (!user) throw new Error('Usuário ou senha incorretos');
 
             const passwordMatch = await compare(senha, user.senha);
-            if (!passwordMatch) throw new Error('Usuário ou senha incorretos');
+            if (!passwordMatch) throw new Error('Senha não confere');
 
             const conBJRD = axios.create({
                 baseURL: String(process.env.BJORD_URL),
@@ -268,12 +268,46 @@ class UserController implements Controller {
             });
 
             await conBJRD.delete('/login/' + userId);
+            await conPC.delete('/delete/' + userId);
 
-            await userModel.findOneAndDelete({ _id: userId, senha: senha });
+            await userModel.findOneAndDelete({ _id: userId });
             await session.commitTransaction();
             return res.status(200).json({ message: 'Delete with success' });
         } catch (error) {
+            console.log(error);
             await session.abortTransaction();
+            return res.status(500).json({ message: 'Something went wrong' });
+        } finally {
+            await session.endSession();
+        }
+    }
+    private async editarapps(req: Request, res: Response): Promise<any> {
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        try {
+            const appsBody = z.object({
+                userId: z.string(),
+                aplicativos: z.array(z.string()),
+            });
+            const { userId, aplicativos } = appsBody.parse(req.body);
+
+            const user = await userModel.findById(userId);
+
+            if (!user) {
+                throw new Error('user not found');
+            }
+            await userModel.findByIdAndUpdate(userId, {
+                $set: {
+                    aplicativos: aplicativos,
+                },
+            });
+
+            await session.commitTransaction();
+        } catch (error: any) {
+            await session.abortTransaction();
+            if (error.message === 'user not found') {
+                return res.status(401).json({ message: 'user not found' });
+            }
             return res.status(500).json({ message: 'Something went wrong' });
         } finally {
             await session.endSession();
