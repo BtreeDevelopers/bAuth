@@ -41,7 +41,7 @@ class UserController implements Controller {
             uploadImage,
             this.uploadImage
         );
-        this.router.post(`${this.path}/editaccount`, auth, this.editarConta);
+        this.router.put(`${this.path}/editaccount`, auth, this.editarConta);
 
         this.router.delete(`${this.path}`, auth, this.deleteaccount);
 
