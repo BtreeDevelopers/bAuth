@@ -28,9 +28,7 @@ class LoginController implements Controller {
     private async login(req: Request, res: Response): Promise<any> {
         try {
             const csrfHeader = (req.headers as any).csrf;
-            const csrfMon = await accessModel.findOneAndDelete({
-                csfr: csrfHeader,
-            });
+
             const loginUser = z.object({
                 email: string().email(),
                 senha: string(),
@@ -50,7 +48,9 @@ class LoginController implements Controller {
                 const passwordMatch = await compare(senha, user.senha);
                 if (!passwordMatch)
                     throw new Error('Usuário ou senha incorretos');
-
+                const csrfMon = await accessModel.findOneAndDelete({
+                    csfr: csrfHeader,
+                });
                 const token = generateToken({ id: user._id });
                 return res.status(200).json({
                     token,
