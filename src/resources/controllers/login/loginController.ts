@@ -80,6 +80,8 @@ class LoginController implements Controller {
         const session = await mongoose.startSession();
         session.startTransaction();
         try {
+            const origem = req.get('origin');
+            console.log(origem);
             const validURL = (req.headers as any).url_retorno;
             if (!validURL) {
                 return res
@@ -100,7 +102,7 @@ class LoginController implements Controller {
                 iv: criptogra.iv,
             });
             await session.commitTransaction();
-            return res.status(200).json({ csfr: keyToAccess });
+            return res.status(200).json({ csfr: keyToAccess, origem });
         } catch (error: any) {
             console.log(error);
             await session.abortTransaction();
