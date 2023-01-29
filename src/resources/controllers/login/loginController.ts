@@ -59,6 +59,8 @@ class LoginController implements Controller {
                         nome: user.nome,
                         email: user.email,
                         imagemUrl: user.imagemUrl,
+                        idioma: user.idioma,
+                        tema: user.tema,
                     },
                     url_retorno: descriptografar({
                         encryptedData: csrfMon?.app,
