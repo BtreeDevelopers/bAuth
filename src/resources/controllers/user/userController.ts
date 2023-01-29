@@ -16,6 +16,7 @@ import accessModel from '@/resources/models/accessModel';
 import { descriptografar } from '@/utils/encript/encript';
 import axios from 'axios';
 import { compare } from 'bcryptjs';
+import { v4 as uuidv4 } from 'uuid';
 
 class UserController implements Controller {
     public path = '/user';
@@ -47,11 +48,10 @@ class UserController implements Controller {
         this.router.post(`${this.path}/delete`, auth, this.deleteaccount);
 
         this.router.post(`${this.path}/apps`, auth, this.editarapps);
-        /*        
-         Editar apps - onde será enviado um novo arrays com os apps 
-        ativos (podendo ser enviado um array vazio, para nenhum)
-        
-       */
+
+        this.router.post(`${this.path}/recover`, this.askToRecover);
+
+        this.router.post(`${this.path}/recover/:token`, this.recover);
     }
 
     private async createNewUser(req: Request, res: Response): Promise<any> {
@@ -88,6 +88,17 @@ class UserController implements Controller {
                     idioma: idioma || 'pt',
                     tema: tema || 'dark',
                     aplicativos: aplicativo !== 'bauth' ? [aplicativo] : [],
+                });
+
+                const conBMAIL = axios.create({
+                    baseURL: String(process.env.BMAIL_URL),
+                    headers: {
+                        'Accept-Encoding': '*',
+                    },
+                });
+                await conBMAIL.post('/send_email/welcome_email', {
+                    userName: nome,
+                    userEmail: email,
                 });
 
                 return res.status(201).json({
@@ -307,6 +318,98 @@ class UserController implements Controller {
             await session.abortTransaction();
             if (error.message === 'user not found') {
                 return res.status(401).json({ message: 'user not found' });
+            }
+            return res.status(500).json({ message: 'Something went wrong' });
+        } finally {
+            await session.endSession();
+        }
+    }
+    private async askToRecover(req: Request, res: Response): Promise<any> {
+        const session = await mongoose.startSession();
+        session.startTransaction();
+
+        try {
+            const Body = z.object({
+                email: z.string().email(),
+            });
+            const { email } = Body.parse(req.body);
+            const user = await userModel.findOne({
+                email: email,
+            });
+
+            if (!user) {
+                throw new Error('user not found');
+            }
+            const keyToAccess = uuidv4();
+
+            await userModel.updateOne(
+                { _id: user.id },
+                {
+                    token_senha: keyToAccess,
+                }
+            );
+
+            const conBMAIL = axios.create({
+                baseURL: String(process.env.BMAIL_URL),
+                headers: {
+                    'Accept-Encoding': '*',
+                },
+            });
+            await conBMAIL.post('/send_email/change_password_email', {
+                userName: user.nome,
+                userEmail: user.email,
+                changePasswordLink:
+                    'https://btreeauth.web.app/password/' + keyToAccess,
+            });
+            await session.commitTransaction();
+            return res.status(200).json({ message: 'email sent' });
+        } catch (error: any) {
+            await session.abortTransaction();
+            if (error.message === 'user not found') {
+                return res.status(401).json({ message: 'user not found' });
+            }
+            console.log(error);
+            return res.status(500).json({ message: 'Something went wrong' });
+        } finally {
+            await session.endSession();
+        }
+    }
+    private async recover(req: Request, res: Response): Promise<any> {
+        const session = await mongoose.startSession();
+        session.startTransaction();
+
+        try {
+            const token = req.params.token;
+            if (!token || token === '') {
+                throw new Error('param not found');
+            }
+            const user = await userModel.findOne({ token_senha: token });
+
+            if (!user) {
+                throw new Error('token is not valid');
+            }
+
+            const alterSenha = z.object({
+                senha: z.string(),
+            });
+
+            const { senha } = alterSenha.parse(req.body);
+
+            const hash = await bcryptjs.hash(senha, 10);
+
+            await userModel.findByIdAndUpdate(user.id, {
+                token_senha: '',
+                senha: hash,
+            });
+            await session.commitTransaction();
+            return res.status(200).json({ message: 'alterado' });
+        } catch (error: any) {
+            await session.abortTransaction();
+            if (error.message === 'param not found') {
+                return res.status(401).json({ message: 'param not found' });
+            }
+            if (error.message === 'token is not valid') {
+                return res.status(401).json({ message: 'token is not valid' });
             }
             return res.status(500).json({ message: 'Something went wrong' });
         } finally {

@@ -8,6 +8,7 @@ interface User extends Document {
     idioma: string;
     tema: string;
     aplicativos: Array<string>;
+    token_senha: string;
 }
 
 export default User;

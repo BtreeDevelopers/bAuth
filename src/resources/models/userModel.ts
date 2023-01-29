@@ -10,6 +10,7 @@ const UserSchema = new Schema(
         idioma: { type: String, require: true },
         tema: { type: String, require: true },
         aplicativos: { type: [String], require: true },
+        token_senha: { type: String, require: true },
     },
     {
         timestamps: true,
