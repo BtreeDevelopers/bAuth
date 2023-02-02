@@ -85,7 +85,7 @@ class UserController implements Controller {
                     nome,
                     email,
                     senha: hash,
-                    idioma: idioma || 'pt',
+                    idioma: idioma || 'br',
                     tema: tema || 'dark',
                     aplicativos: aplicativo !== 'bauth' ? [aplicativo] : [],
                 });
