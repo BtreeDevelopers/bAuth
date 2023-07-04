@@ -1,4 +1,4 @@
-Based on https://youtu.be/MLPTh3XVc2o thx <3
+Based on https://www.youtube.com/watch?v=1o9YOHeKhNQ thx <3
 
 npm init -y
 npm i -D typescript tsc-watch eslint prettier eslint-config-prettier eslint-plugin-prettier @typescript-eslint/parser @typescript-eslint/eslint-plugin @types/node @types/express
