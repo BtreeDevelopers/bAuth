@@ -159,9 +159,11 @@ class UserController implements Controller {
             }
 
             if (req.params.typeparam === 'nome') {
-                const user = await userModel.find({
-                    nome: req.params.param,
-                });
+                const user = await userModel
+                    .find({
+                        nome: { $regex: req.params.param, $options: 'ix' },
+                    })
+                    .limit(10);
                 return res.status(201).json({ user });
             }
         } catch (error) {
