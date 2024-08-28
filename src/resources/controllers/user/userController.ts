@@ -62,16 +62,18 @@ class UserController implements Controller {
             });
 
             const newUserBody = z.object({
-                nome: z.string().min(1),
-                email: z.string().email(),
+                nome: z.string().min(1).trim(),
+                email: z.string().email().trim(),
                 senha: z.string(),
                 idioma: z.string().optional(),
                 tema: z.string().optional(),
             });
 
-            const { nome, email, senha, idioma, tema } = newUserBody.parse(
+            const { nome, email:emailNaoFormatado, senha, idioma, tema } = newUserBody.parse(
                 req.body
             );
+            const email = emailNaoFormatado.toLowerCase();
+
             let aplicativo = descriptografar({
                 encryptedData: csrfMon?.app,
                 iv: csrfMon?.iv,
@@ -218,14 +220,15 @@ class UserController implements Controller {
         try {
             const editUserBody = z.object({
                 userId: z.string(),
-                nome: z.string().min(1).optional(),
-                email: z.string().email().optional(),
+                nome: z.string().min(1).trim().optional(),
+                email: z.string().email().trim().optional(),
                 idioma: z.string().optional(),
                 tema: z.string().optional(),
             });
-            const { userId, nome, email, idioma, tema } = editUserBody.parse(
+            const { userId, nome, email:emailNaoFormatado, idioma, tema } = editUserBody.parse(
                 req.body
             );
+            const email = emailNaoFormatado ? emailNaoFormatado.toLowerCase() : undefined;
 
             const user = await userModel.findById(userId);
             if (!user) {
@@ -332,9 +335,10 @@ class UserController implements Controller {
 
         try {
             const Body = z.object({
-                email: z.string().email(),
+                email: z.string().email().trim(),
             });
-            const { email } = Body.parse(req.body);
+            const { email:emailNaoFormatado } = Body.parse(req.body);
+            const email = emailNaoFormatado.toLowerCase();
             const user = await userModel.findOne({
                 email: email,
             });
