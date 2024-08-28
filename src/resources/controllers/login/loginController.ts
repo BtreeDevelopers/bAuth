@@ -34,8 +34,8 @@ class LoginController implements Controller {
                 senha: string(),
             });
 
-            const { email, senha } = loginUser.parse(req.body);
-
+            const { email:emailNaoFormatado, senha } = loginUser.parse(req.body);
+            const email = emailNaoFormatado.toLowerCase();
             const user = await userModel
                 .findOne({ email: email })
                 .populate('senha');
