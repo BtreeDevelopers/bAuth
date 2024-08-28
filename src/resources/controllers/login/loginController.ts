@@ -30,7 +30,7 @@ class LoginController implements Controller {
             const csrfHeader = (req.headers as any).csrf;
 
             const loginUser = z.object({
-                email: string().email().trim(),
+                email: string().trim().email(),
                 senha: string(),
             });
 

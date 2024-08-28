@@ -63,7 +63,7 @@ class UserController implements Controller {
 
             const newUserBody = z.object({
                 nome: z.string().min(1).trim(),
-                email: z.string().email().trim(),
+                email: z.string().trim().email(),
                 senha: z.string(),
                 idioma: z.string().optional(),
                 tema: z.string().optional(),
@@ -100,6 +100,7 @@ class UserController implements Controller {
                 });
                 await conBMAIL.post('/send_email/welcome_email', {
                     userName: nome,
+                    welcomeLink: "https://btreeauth.web.app/",
                     userEmail: email,
                 });
 
@@ -335,7 +336,7 @@ class UserController implements Controller {
 
         try {
             const Body = z.object({
-                email: z.string().email().trim(),
+                email: z.string().trim().email(),
             });
             const { email:emailNaoFormatado } = Body.parse(req.body);
             const email = emailNaoFormatado.toLowerCase();
