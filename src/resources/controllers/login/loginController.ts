@@ -1,7 +1,7 @@
 import Controller from '@/utils/interfaces/controllerInterface';
 import userModel from '@/resources/models/userModel';
 import accessModel from '@/resources/models/accessModel';
-import generateToken from '@/utils/Auth/jwt.auth';
+import generateToken, { openToken } from '@/utils/Auth/jwt.auth';
 
 import { Router, Request, Response } from 'express';
 import z, { string } from 'zod';
@@ -23,6 +23,75 @@ class LoginController implements Controller {
     public async initialiseRoutes(): Promise<void> {
         this.router.post(`${this.path}`, csrf, this.login);
         this.router.get(`${this.path}/csrf`, this.criarCSFR);
+
+        this.router.get(`${this.path}/renova`, csrf, this.loginRenova);
+    }
+
+    private async loginRenova(req: Request, res: Response): Promise<any> {
+        try {
+            const csrfHeader = (req.headers as any).csrf;
+            const renovaHeader = (req.headers as any).btoken;
+
+            const btokenData = openToken(renovaHeader);
+            const dataLimite = new Date(btokenData.expire);
+
+            const csrfMon = await accessModel.findOneAndDelete({
+                csfr: csrfHeader,
+            });
+
+            if (!csrfMon) {
+                throw new Error('CSRF Inválido ou não encontrado');
+            }
+
+            const user = await userModel.findOne({ _id: btokenData.id });
+
+            if (!user) {
+                return res
+                    .status(401)
+                    .json({ message: 'Usuário não cadastrado' });
+            }
+
+            const hoje = new Date();
+
+            // Validar se a data de hoje é menor ou igual à data futura
+            if (hoje <= dataLimite) {
+                const hoje = new Date();
+                // Adicionar 30 dias
+                const dataFutura = new Date();
+                dataFutura.setDate(hoje.getDate() + 30);
+
+                const token = generateToken({
+                    id: user._id,
+                    expire: dataFutura.toISOString(),
+                });
+
+                return res.status(200).json({
+                    token,
+                    user: {
+                        _id: user._id,
+                        nome: user.nome,
+                        email: user.email,
+                        imagemUrl: user.imagemUrl,
+                        idioma: user.idioma,
+                        tema: user.tema,
+                    },
+                    url_retorno: descriptografar({
+                        encryptedData: csrfMon?.app,
+                        iv: csrfMon?.iv,
+                    }),
+                });
+            } else {
+                throw new Error('Data de renovação ultrapassada');
+            }
+        } catch (error: any) {
+            if (error.message === 'Usuário ou senha incorretos') {
+                return res
+                    .status(401)
+                    .json({ message: 'Usuário ou senha incorretos' });
+            }
+            console.log(error);
+            return res.status(400).json({ error });
+        }
     }
 
     private async login(req: Request, res: Response): Promise<any> {
@@ -34,7 +103,9 @@ class LoginController implements Controller {
                 senha: string(),
             });
 
-            const { email:emailNaoFormatado, senha } = loginUser.parse(req.body);
+            const { email: emailNaoFormatado, senha } = loginUser.parse(
+                req.body
+            );
             const email = emailNaoFormatado.toLowerCase();
             const user = await userModel
                 .findOne({ email: email })
@@ -51,7 +122,16 @@ class LoginController implements Controller {
                 const csrfMon = await accessModel.findOneAndDelete({
                     csfr: csrfHeader,
                 });
-                const token = generateToken({ id: user._id });
+
+                const hoje = new Date();
+                // Adicionar 30 dias
+                const dataFutura = new Date();
+                dataFutura.setDate(hoje.getDate() + 30);
+
+                const token = generateToken({
+                    id: user._id,
+                    expire: dataFutura.toISOString(),
+                });
                 return res.status(200).json({
                     token,
                     user: {
