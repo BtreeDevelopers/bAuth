@@ -12,4 +12,8 @@ export function openToken(token: string) {
     return dados as any;
 }
 
+export function parseJwt(token: string) {
+    return JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+}
+
 export default generateToken;

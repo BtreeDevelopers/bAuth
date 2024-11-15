@@ -1,7 +1,7 @@
 import Controller from '@/utils/interfaces/controllerInterface';
 import userModel from '@/resources/models/userModel';
 import accessModel from '@/resources/models/accessModel';
-import generateToken, { openToken } from '@/utils/Auth/jwt.auth';
+import generateToken, { parseJwt } from '@/utils/Auth/jwt.auth';
 
 import { Router, Request, Response } from 'express';
 import z, { string } from 'zod';
@@ -32,7 +32,7 @@ class LoginController implements Controller {
             const csrfHeader = (req.headers as any).csrf;
             const renovaHeader = (req.headers as any).btoken;
 
-            const btokenData = openToken(renovaHeader);
+            const btokenData = parseJwt(renovaHeader);
             const dataLimite = new Date(btokenData.expire);
 
             const csrfMon = await accessModel.findOneAndDelete({
