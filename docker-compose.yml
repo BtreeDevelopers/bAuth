@@ -1,0 +1,30 @@
+services:
+  app:
+    build: .
+    ports:
+      - "2310:3000"
+    environment:
+      - PORT=3000
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_PATH=mongodb://mongo:27017/bauth?authSource=admin
+      - JWT_SECRET=${JWT_SECRET}
+      - ALLOWED_APP=${ALLOWED_APP}
+    depends_on:
+      - mongo
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+
+  mongo:
+    image: mongo
+    ports:
+      - "27024:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
