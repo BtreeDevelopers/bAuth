@@ -5,9 +5,12 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Copie os arquivos de dependências
-COPY package*.json ./
-COPY tsconfig.json ./ 
+WORKDIR /app
 
+COPY package*.json tsconfig.json ./
+COPY src ./src
+
+RUN npm install
 # Instale as dependências de produção
 RUN npm install
 
