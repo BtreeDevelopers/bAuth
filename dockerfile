@@ -8,7 +8,7 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Instale as dependências de produção
-RUN npm install --production
+RUN npm install
 
 # Copie o restante dos arquivos da aplicação
 COPY . .
