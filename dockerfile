@@ -6,6 +6,7 @@ WORKDIR /app
 
 # Copie os arquivos de dependências
 COPY package*.json ./
+COPY tsconfig.json ./ 
 
 # Instale as dependências de produção
 RUN npm install
