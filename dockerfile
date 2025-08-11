@@ -2,7 +2,7 @@
 FROM node:18-alpine
 
 # Defina o diretório de trabalho no contêiner
-WORKDIR /usr/src/app
+WORKDIR /app
 
 # Copie os arquivos de dependências
 COPY package*.json ./
